@@ -1,26 +1,139 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import 'tailwindcss';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F8F9FA;
+  --foreground: #1A1D23;
+  --card: #FFFFFF;
+  --card-foreground: #1A1D23;
+  --primary: #4F46E5;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F1F0EF;
+  --secondary-foreground: #3D3D3D;
+  --muted: #F0F1F3;
+  --muted-foreground: #868E96;
+  --accent: #EEF2FF;
+  --accent-foreground: #4338CA;
+  --border: #E5E7EB;
+  --ring: #4F46E5;
+  --radius: 10px;
+
+  --canvas-dot: #D1D5DB;
+  --canvas-bg: #F0F2F5;
+  --header-h: 56px;
+
+  --font-display: 'DM Sans', sans-serif;
+  --font-body: 'Inter', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+.dark {
+  --background: #0F1117;
+  --foreground: #ECEEF2;
+  --card: #191B22;
+  --card-foreground: #ECEEF2;
+  --primary: #6366F1;
+  --primary-foreground: #FFFFFF;
+  --secondary: #22252E;
+  --secondary-foreground: #B0B4BD;
+  --muted: #1E2028;
+  --muted-foreground: #666B78;
+  --accent: #1E1F3A;
+  --accent-foreground: #818CF8;
+  --border: #2A2D38;
+  --ring: #6366F1;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --canvas-dot: #252832;
+  --canvas-bg: #0D0F14;
 }
 
 body {
-  background: var(--background);
+  font-family: var(--font-body);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* dot-grid canvas */
+.canvas-grid {
+  background-color: var(--canvas-bg);
+  background-image: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* draggable cards */
+.paper-card {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.15s ease;
+  will-change: transform;
+}
+
+.paper-card:active {
+  cursor: grabbing;
+}
+
+/* right panel slide-in */
+.panel-slide-in {
+  animation: slideInRight 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.thin-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.zoom-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #166534;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(6px);
+  }
+
+  to {
+    transform: scale(1) translateY(0);
+  }
 }
