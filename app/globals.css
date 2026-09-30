@@ -1,50 +1,73 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-@import 'tailwindcss';
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
+
+@theme inline {
+  --font-display: "DM Sans", sans-serif;
+  --font-body: "Inter", "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+    "Noto Sans JP", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --radius-default: var(--radius);
+}
 
 :root {
-  --background: #F8F9FA;
-  --foreground: #1A1D23;
-  --card: #FFFFFF;
-  --card-foreground: #1A1D23;
-  --primary: #4F46E5;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F1F0EF;
-  --secondary-foreground: #3D3D3D;
-  --muted: #F0F1F3;
-  --muted-foreground: #868E96;
-  --accent: #EEF2FF;
-  --accent-foreground: #4338CA;
-  --border: #E5E7EB;
-  --ring: #4F46E5;
+  --background: #f8f9fa;
+  --foreground: #1a1d23;
+  --card: #ffffff;
+  --card-foreground: #1a1d23;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f0ef;
+  --secondary-foreground: #3d3d3d;
+  --muted: #f0f1f3;
+  --muted-foreground: #868e96;
+  --accent: #eef2ff;
+  --accent-foreground: #4338ca;
+  --border: #e5e7eb;
+  --ring: #4f46e5;
   --radius: 10px;
 
-  --canvas-dot: #D1D5DB;
-  --canvas-bg: #F0F2F5;
+  --canvas-dot: #d1d5db;
+  --canvas-bg: #f0f2f5;
   --header-h: 56px;
-
-  --font-display: 'DM Sans', sans-serif;
-  --font-body: 'Inter', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
 }
 
 .dark {
-  --background: #0F1117;
-  --foreground: #ECEEF2;
-  --card: #191B22;
-  --card-foreground: #ECEEF2;
-  --primary: #6366F1;
-  --primary-foreground: #FFFFFF;
-  --secondary: #22252E;
-  --secondary-foreground: #B0B4BD;
-  --muted: #1E2028;
-  --muted-foreground: #666B78;
-  --accent: #1E1F3A;
-  --accent-foreground: #818CF8;
-  --border: #2A2D38;
-  --ring: #6366F1;
+  --background: #0f1117;
+  --foreground: #eceef2;
+  --card: #191b22;
+  --card-foreground: #eceef2;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: #22252e;
+  --secondary-foreground: #b0b4bd;
+  --muted: #1e2028;
+  --muted-foreground: #666b78;
+  --accent: #1e1f3a;
+  --accent-foreground: #818cf8;
+  --border: #2a2d38;
+  --ring: #6366f1;
 
   --canvas-dot: #252832;
-  --canvas-bg: #0D0F14;
+  --canvas-bg: #0d0f14;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -55,14 +78,16 @@ body {
   overflow: hidden;
 }
 
-/* dot-grid canvas */
+/* ドットグリッドのキャンバス */
 .canvas-grid {
   background-color: var(--canvas-bg);
-  background-image: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px);
+  background-image: radial-gradient(circle,
+      var(--canvas-dot) 1px,
+      transparent 1px);
   background-size: 28px 28px;
 }
 
-/* draggable cards */
+/* ドラッグ可能なカード */
 .paper-card {
   position: absolute;
   cursor: grab;
@@ -75,7 +100,12 @@ body {
   cursor: grabbing;
 }
 
-/* right panel slide-in */
+.paper-card.is-dragging {
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.14);
+  z-index: 999;
+}
+
+/* 右パネルのスライド表示 */
 .panel-slide-in {
   animation: slideInRight 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -92,6 +122,7 @@ body {
   }
 }
 
+/* パネル内スクロールバー */
 .thin-scroll::-webkit-scrollbar {
   width: 4px;
 }
@@ -117,6 +148,11 @@ body {
   }
 }
 
+/* ズームスライダー */
+.zoom-slider {
+  background: var(--border);
+}
+
 .zoom-slider::-webkit-slider-thumb {
   appearance: none;
   width: 13px;
@@ -125,6 +161,20 @@ body {
   background: #166534;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease;
+}
+
+.zoom-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.zoom-slider::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: none;
+  border-radius: 50%;
+  background: #166534;
+  cursor: pointer;
 }
 
 @keyframes fadeScaleIn {
@@ -134,6 +184,12 @@ body {
   }
 
   to {
+    opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }

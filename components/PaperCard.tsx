@@ -4,52 +4,64 @@ import React from "react";
 import { Paper, CardColor } from "@/types/paper";
 import { IC } from "./Icons";
 
-// 論文カードのカラー定義
-export const GLASS: Record<
+const GLASS: Record<
   CardColor,
-  { bg: string; border: string; accent: string; tagBg: string; text: string }
+  {
+    rgb: string;
+    border: string;
+    tagBg: string;
+    tagText: string;
+    dot: string;
+    headerRgb: string;
+  }
 > = {
   sky: {
-    bg: "rgba(240,249,255,0.85)",
-    border: "rgba(186,230,253,0.8)",
-    accent: "#0284c7",
-    tagBg: "rgba(224,242,254,0.9)",
-    text: "#0369a1",
+    rgb: "14,165,233",
+    border: "rgba(14,165,233,0.35)",
+    tagBg: "rgba(14,165,233,0.18)",
+    tagText: "#0369a1",
+    dot: "#38bdf8",
+    headerRgb: "14,165,233",
   },
   indigo: {
-    bg: "rgba(238,242,255,0.85)",
-    border: "rgba(199,210,254,0.8)",
-    accent: "#4f46e5",
-    tagBg: "rgba(224,231,255,0.9)",
-    text: "#3730a3",
+    rgb: "99,102,241",
+    border: "rgba(99,102,241,0.35)",
+    tagBg: "rgba(99,102,241,0.18)",
+    tagText: "#4338ca",
+    dot: "#818cf8",
+    headerRgb: "99,102,241",
   },
   emerald: {
-    bg: "rgba(236,253,245,0.85)",
-    border: "rgba(167,243,208,0.8)",
-    accent: "#059669",
-    tagBg: "rgba(209,250,229,0.9)",
-    text: "#065f46",
+    rgb: "16,185,129",
+    border: "rgba(16,185,129,0.35)",
+    tagBg: "rgba(16,185,129,0.18)",
+    tagText: "#047857",
+    dot: "#34d399",
+    headerRgb: "16,185,129",
   },
   violet: {
-    bg: "rgba(245,243,255,0.85)",
-    border: "rgba(221,214,254,0.8)",
-    accent: "#7c3aed",
-    tagBg: "rgba(237,233,254,0.9)",
-    text: "#5b21b6",
+    rgb: "139,92,246",
+    border: "rgba(139,92,246,0.35)",
+    tagBg: "rgba(139,92,246,0.18)",
+    tagText: "#6d28d9",
+    dot: "#a78bfa",
+    headerRgb: "139,92,246",
   },
   rose: {
-    bg: "rgba(255,241,242,0.85)",
-    border: "rgba(254,205,211,0.8)",
-    accent: "#e11d48",
-    tagBg: "rgba(255,228,230,0.9)",
-    text: "#9f1239",
+    rgb: "244,63,94",
+    border: "rgba(244,63,94,0.35)",
+    tagBg: "rgba(244,63,94,0.18)",
+    tagText: "#be123c",
+    dot: "#fb7185",
+    headerRgb: "244,63,94",
   },
   amber: {
-    bg: "rgba(254,252,232,0.85)",
-    border: "rgba(254,240,138,0.8)",
-    accent: "#d97706",
-    tagBg: "rgba(254,249,195,0.9)",
-    text: "#92400e",
+    rgb: "245,158,11",
+    border: "rgba(245,158,11,0.35)",
+    tagBg: "rgba(245,158,11,0.18)",
+    tagText: "#b45309",
+    dot: "#fbbf24",
+    headerRgb: "245,158,11",
   },
 };
 
@@ -59,112 +71,165 @@ interface PaperCardProps {
   dark: boolean;
   zoom: number;
   onMouseDown: (e: React.MouseEvent, id: string) => void;
-  onSelectPaper: (p: Paper) => void;
+  onSelectPaper: (paper: Paper) => void;
   onDeletePaper: (id: string, e: React.MouseEvent) => void;
 }
 
 export function PaperCard({
   paper,
   selected,
-  dark,
-  zoom,
   onMouseDown,
   onSelectPaper,
-  onDeletePaper,
 }: PaperCardProps) {
-  const g = GLASS[paper.color] || GLASS.sky;
+  const color = GLASS[paper.color];
 
-  const darkBg = "rgba(26,29,38,0.92)";
-  const darkBorder = selected ? "#818cf8" : "rgba(255,255,255,0.12)";
+  const cardStyle: React.CSSProperties = {
+    background: `rgba(${color.rgb}, 0.13)`,
+    backdropFilter: "blur(18px) saturate(1.6)",
+    WebkitBackdropFilter: "blur(18px) saturate(1.6)",
+    border: `1.5px solid ${color.border}`,
+    boxShadow: selected
+      ? `0 0 0 2.5px ${color.dot}, 0 16px 48px rgba(${color.rgb},0.22), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.55)`
+      : `0 8px 32px rgba(${color.rgb},0.14), 0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.55)`,
+    borderRadius: 16,
+  };
+
+  const headerStyle: React.CSSProperties = {
+    background: `rgba(${color.headerRgb}, 0.10)`,
+    borderBottom: `1px solid rgba(${color.rgb}, 0.18)`,
+  };
 
   return (
     <div
-      className="paper-card rounded-2xl p-4 cursor-grab active:cursor-grabbing transition-shadow"
-      style={{
-        left: paper.x,
-        top: paper.y,
-        width: 320,
-        backgroundColor: dark ? darkBg : g.bg,
-        border: `1.5px solid ${dark ? darkBorder : selected ? g.accent : g.border}`,
-        backdropFilter: "blur(12px)",
-        boxShadow: selected
-          ? `0 0 0 3px ${g.accent}33, 0 12px 32px rgba(0,0,0,0.15)`
-          : "0 4px 20px rgba(0,0,0,0.06)",
+      className="paper-card w-[268px] overflow-hidden"
+      style={{ left: paper.x, top: paper.y, ...cardStyle }}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        onMouseDown(e, paper.id);
       }}
-      onMouseDown={(e) => onMouseDown(e, paper.id)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelectPaper(paper);
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        onSelectPaper(paper);
+      }}
     >
-      {/* 上部ヘッダー：タグと削除ボタン */}
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {paper.tags.map((t) => (
+      <div className="px-4 pt-3.5 pb-3" style={headerStyle}>
+        <div className="flex items-center justify-between mb-2">
+          <span
+            className="text-[10px] font-semibold tracking-widest uppercase"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: color.dot,
+            }}
+          >
+            {paper.year}
+          </span>
+          <div
+            className="w-2 h-2 rounded-full shadow-sm"
+            style={{
+              background: color.dot,
+              boxShadow: `0 0 6px ${color.dot}`,
+            }}
+          />
+        </div>
+
+        <h3
+          className="text-[13px] font-semibold leading-[1.35] line-clamp-2"
+          style={{
+            fontFamily: "var(--font-display)",
+            color: "var(--card-foreground)",
+          }}
+        >
+          {paper.title}
+        </h3>
+
+        <p
+          className="text-[11px] mt-1 truncate"
+          style={{ color: "var(--muted-foreground)" }}
+        >
+          {paper.authors.join(" · ")}
+        </p>
+      </div>
+
+      <div className="px-4 py-3">
+        <div className="flex items-center gap-1.5 mb-2">
+          <span style={{ color: color.dot }}>
+            <IC.Sparkle />
+          </span>
+          <span
+            className="text-[10px] font-semibold uppercase tracking-wider"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: "var(--muted-foreground)",
+            }}
+          >
+            AIサマリー
+          </span>
+        </div>
+
+        <ul className="space-y-1.5">
+          {paper.bullets.map((bullet, index) => (
+            <li
+              key={index}
+              className="flex gap-2 text-[11px] leading-[1.5]"
+              style={{ color: "var(--muted-foreground)" }}
+            >
+              <span
+                className="mt-[4px] flex-shrink-0 w-1 h-1 rounded-full"
+                style={{ background: color.dot, opacity: 0.7 }}
+              />
+              <span className="line-clamp-2">{bullet}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div
+        className="px-4 pb-3.5 pt-2"
+        style={{ borderTop: `1px solid rgba(${color.rgb},0.18)` }}
+      >
+        <div className="flex flex-wrap gap-1 mb-2.5">
+          {paper.tags.map((tag) => (
             <span
-              key={t}
-              className="text-[10px] font-semibold px-2 py-0.5 rounded-md tracking-wide uppercase"
+              key={tag}
+              className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
               style={{
                 fontFamily: "var(--font-mono)",
-                backgroundColor: dark ? "rgba(255,255,255,0.08)" : g.tagBg,
-                color: dark ? "#a5b4fc" : g.text,
+                background: `rgba(${color.rgb},0.18)`,
+                color: color.tagText,
               }}
             >
-              {t}
+              #{tag}
             </span>
           ))}
         </div>
-        <button
-          onClick={(e) => onDeletePaper(paper.id, e)}
-          className="text-gray-400 hover:text-red-500 p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex-shrink-0"
-        >
-          <IC.X />
-        </button>
-      </div>
 
-      {/* タイトル */}
-      <h3
-        className="font-bold text-[13px] leading-snug mb-1.5 line-clamp-2"
-        style={{
-          color: dark ? "#f3f4f6" : "#111827",
-          fontFamily: "var(--font-body)",
-        }}
-      >
-        {paper.title}
-      </h3>
-
-      {/* 著者と発行年 */}
-      <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2.5 truncate">
-        {paper.authors.join(", ")} • {paper.year}
-      </p>
-
-      {/* 要約箇条書き */}
-      <div className="space-y-1 mb-3">
-        {paper.bullets.map((b, i) => (
-          <div
-            key={i}
-            className="flex items-start gap-1.5 text-[11px] leading-tight text-gray-600 dark:text-gray-300"
+        <div className="flex items-center justify-between">
+          <span
+            className="text-[10px]"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: "var(--muted-foreground)",
+            }}
           >
-            <span
-              className="mt-1 w-1 h-1 rounded-full flex-shrink-0"
-              style={{ backgroundColor: g.accent }}
-            />
-            <span className="line-clamp-2">{b}</span>
-          </div>
-        ))}
-      </div>
+            {paper.createdDate}
+          </span>
 
-      {/* 下部アクション：詳細表示ボタン */}
-      <div className="pt-2 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
-        <span className="text-[10px] text-gray-400 font-mono">
-          {paper.createdDate}
-        </span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelectPaper(paper);
-          }}
-          className="flex items-center gap-1 text-[11px] font-semibold hover:underline"
-          style={{ color: g.accent }}
-        >
-          詳細を見る <IC.Expand />
-        </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectPaper(paper);
+            }}
+            className="flex items-center gap-1 text-[11px] font-semibold hover:opacity-70 transition-opacity"
+            style={{ color: color.dot }}
+          >
+            <IC.Expand />
+            詳細
+          </button>
+        </div>
       </div>
     </div>
   );

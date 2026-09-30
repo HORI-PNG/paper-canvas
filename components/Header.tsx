@@ -9,11 +9,11 @@ interface HeaderProps {
   showMenu: boolean;
   setShowMenu: React.Dispatch<React.SetStateAction<boolean>>;
   urlInput: string;
-  setUrlInput: (val: string) => void;
+  setUrlInput: (value: string) => void;
   handleAnalyze: () => void;
   loading: boolean;
   handleAddMemo: () => void;
-  setShowGroupModal: (val: boolean) => void;
+  setShowGroupModal: (value: boolean) => void;
   paperCount: number;
 }
 
@@ -32,29 +32,36 @@ export function Header({
 }: HeaderProps) {
   return (
     <header
-      className="fixed top-0 left-0 right-0 flex-shrink-0 flex items-center gap-3 px-4 z-20 border-b"
+      className="flex flex-shrink-0 items-center gap-3 border-b px-4"
       style={{
         height: "var(--header-h, 56px)",
         background: dark ? "#1a3d2b" : "#98fb98",
         borderColor: dark ? "#0f2d1e" : "#6ddb6d",
       }}
     >
-      {/* ハンバーガーボタン */}
       <button
-        onClick={() => setShowMenu((v) => !v)}
-        className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors flex-shrink-0"
+        onClick={() => setShowMenu((visible) => !visible)}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "rgba(134,239,172,0.15)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = showMenu
+            ? "rgba(134,239,172,0.15)"
+            : "transparent";
+        }}
+        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-colors"
         style={{
           color: dark ? "#86efac" : "#166534",
           background: showMenu ? "rgba(134,239,172,0.15)" : "transparent",
         }}
+        aria-label="メニューを開く"
       >
         <IC.Menu />
       </button>
 
-      {/* ロゴ */}
-      <div className="flex items-center flex-shrink-0 mr-1">
+      <div className="mr-1 flex flex-shrink-0 items-center">
         <span
-          className="font-semibold text-[14px] tracking-tight"
+          className="text-[14px] font-semibold tracking-tight"
           style={{
             fontFamily: "var(--font-display)",
             color: dark ? "#bbf7d0" : "#14532d",
@@ -65,36 +72,41 @@ export function Header({
       </div>
 
       <div
-        className="w-px h-5 flex-shrink-0"
+        className="h-5 w-px flex-shrink-0"
         style={{ background: "rgba(0,80,30,0.2)" }}
       />
 
-      {/* URL入力 ＆ 解析ボタン */}
       <div
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-shadow"
+        className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 transition-shadow"
         style={{
           background: dark
             ? "rgba(255,255,255,0.07)"
             : "rgba(255,255,255,0.55)",
-          border: `1px solid ${dark ? "rgba(134,239,172,0.2)" : "rgba(0,80,30,0.2)"}`,
+          border: `1px solid ${
+            dark ? "rgba(134,239,172,0.2)" : "rgba(0,80,30,0.2)"
+          }`,
           width: 320,
         }}
       >
         <span style={{ color: "#4ade80", flexShrink: 0 }}>
           <IC.Link />
         </span>
+
         <input
           value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleAnalyze();
+          }}
           placeholder="arXiv URL を貼り付け..."
-          className="flex-1 text-[11px] bg-transparent outline-none min-w-0"
+          className="min-w-0 flex-1 bg-transparent text-[11px] outline-none"
           style={{ color: dark ? "#bbf7d0" : "#14532d" }}
         />
+
         <button
           onClick={handleAnalyze}
           disabled={loading || !urlInput.trim()}
-          className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md disabled:opacity-50 transition-opacity flex-shrink-0"
+          className="flex flex-shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-opacity disabled:opacity-50"
           style={{
             fontFamily: "var(--font-display)",
             background: "#166534",
@@ -102,64 +114,74 @@ export function Header({
             border: "1px solid #0f4d24",
           }}
         >
-          {loading ? <IC.Loader /> : <IC.Sparkle />} 解析
+          {loading ? <IC.Loader /> : <IC.Sparkle />}
+          解析
         </button>
       </div>
 
       <div
-        className="w-px h-5 flex-shrink-0"
+        className="h-5 w-px flex-shrink-0"
         style={{ background: "rgba(0,80,30,0.2)" }}
       />
 
-      {/* メモ追加ボタン */}
       <button
         onClick={handleAddMemo}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors flex-shrink-0"
+        className="flex flex-shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors"
         style={{
           fontFamily: "var(--font-display)",
           color: dark ? "#86efac" : "#166534",
           background: dark
             ? "rgba(255,255,255,0.07)"
             : "rgba(255,255,255,0.45)",
-          border: `1px solid ${dark ? "rgba(134,239,172,0.2)" : "rgba(0,80,30,0.25)"}`,
+          border: `1px solid ${
+            dark ? "rgba(134,239,172,0.2)" : "rgba(0,80,30,0.25)"
+          }`,
         }}
       >
-        <IC.Pencil /> メモ追加
+        <IC.Pencil />
+        メモ追加
       </button>
 
-      {/* グループ分けボタン */}
       <button
         onClick={() => setShowGroupModal(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors flex-shrink-0"
+        className="flex flex-shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors"
         style={{
           fontFamily: "var(--font-display)",
           color: dark ? "#86efac" : "#166534",
           background: dark
             ? "rgba(255,255,255,0.07)"
             : "rgba(255,255,255,0.45)",
-          border: `1px solid ${dark ? "rgba(134,239,172,0.2)" : "rgba(0,80,30,0.25)"}`,
+          border: `1px solid ${
+            dark ? "rgba(134,239,172,0.2)" : "rgba(0,80,30,0.25)"
+          }`,
         }}
       >
-        <IC.Layers /> グループ分け
+        <IC.Layers />
+        グループ分け
       </button>
 
       <div
-        className="w-px h-5 flex-shrink-0"
+        className="ml-auto h-5 w-px flex-shrink-0"
         style={{ background: "rgba(0,80,30,0.2)" }}
       />
 
-      {/* ダークモード切り替え */}
       <button
-        onClick={() => setDark((d) => !d)}
-        className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors flex-shrink-0"
+        onClick={() => setDark((current) => !current)}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "rgba(134,239,172,0.15)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "transparent";
+        }}
+        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg transition-colors"
         style={{ color: dark ? "#86efac" : "#166534" }}
+        aria-label={dark ? "ライトモードに切り替え" : "ダークモードに切り替え"}
       >
         {dark ? <IC.Sun /> : <IC.Moon />}
       </button>
 
-      {/* 件数バッジ */}
       <span
-        className="text-[11px] px-2 py-0.5 rounded-full flex-shrink-0 font-medium"
+        className="flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium"
         style={{
           fontFamily: "var(--font-mono)",
           background: "rgba(134,239,172,0.15)",

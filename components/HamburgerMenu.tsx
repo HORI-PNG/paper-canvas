@@ -12,154 +12,165 @@ interface HamburgerMenuProps {
   onClose: () => void;
 }
 
-export function HamburgerMenu({
-  showMenu,
-  dark,
-  setDark,
-  zoom,
-  setZoom,
-  onClose,
-}: HamburgerMenuProps) {
+const ACCOUNT_INFO = [
+  { label: "ユーザーID", value: "yamada-taro-2024" },
+  { label: "最終ログイン", value: "2026-09-29 09:14" },
+  { label: "ストレージ", value: "2.4 GB / 10 GB" },
+];
+
+export function HamburgerMenu({ showMenu, onClose }: HamburgerMenuProps) {
   if (!showMenu) return null;
 
   return (
-    <div
-      className="fixed top-0 left-0 h-full w-[280px] z-40 shadow-2xl flex flex-col border-r"
-      style={{
-        backgroundColor: dark ? "#191b22" : "#ffffff",
-        borderColor: dark ? "#2a2d38" : "#e5e7eb",
-        color: dark ? "#eceef2" : "#1a1d23",
-        animation: "slideInLeft 0.22s cubic-bezier(0.22, 1, 0.36, 1) both",
-      }}
-    >
-      {/* ヘッダー */}
-      <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/5">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-bold">
-            P
-          </div>
-          <span className="text-[13px] font-bold tracking-tight">
-            PaperCanvas
-          </span>
-        </div>
-        <button
-          onClick={onClose}
-          className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+    <>
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+
+      <aside
+        className="fixed bottom-0 left-0 top-[var(--header-h)] z-50 flex w-72 flex-col shadow-2xl animate-[slideInLeft_0.22s_cubic-bezier(0.22,1,0.36,1)_both]"
+        style={{
+          background: "var(--card)",
+          borderRight: "1px solid var(--border)",
+        }}
+      >
+        <div
+          className="border-b px-5 py-5"
+          style={{
+            borderColor: "var(--border)",
+            background: "linear-gradient(135deg, #14532d 0%, #166534 100%)",
+          }}
         >
-          <IC.X />
-        </button>
-      </div>
-
-      {/* ユーザーカード */}
-      <div className="p-4 border-b border-black/5 dark:border-white/5 flex items-center gap-3 bg-indigo-50/50 dark:bg-indigo-950/20">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-sm">
-          <IC.User />
-        </div>
-        <div className="overflow-hidden">
-          <p className="text-[13px] font-bold truncate">研究者 ユーザー</p>
-          <p className="text-[10px] text-indigo-500 dark:text-indigo-400 font-mono font-medium">
-            Pro Plan Member
-          </p>
-        </div>
-      </div>
-
-      {/* メニュー本文 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 thin-scroll">
-        {/* キャンバスコントロール */}
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase font-mono mb-2.5 tracking-wider">
-            Canvas Control
-          </p>
-          <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl border border-black/5 dark:border-white/5 space-y-2">
-            <div className="flex items-center justify-between text-[11px] font-medium text-gray-500 dark:text-gray-400">
-              <span>Zoom Level</span>
-              <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                {Math.round(zoom * 100)}%
-              </span>
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white/30 bg-white/20 text-white">
+              <IC.User />
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setZoom((z) => Math.max(0.4, z - 0.1))}
-                className="p-1.5 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-100 text-gray-600 dark:text-gray-300"
+
+            <div>
+              <p
+                className="text-[14px] font-semibold text-white"
+                style={{ fontFamily: "var(--font-display)" }}
               >
-                <IC.Minus />
-              </button>
-              <input
-                type="range"
-                min="0.4"
-                max="1.8"
-                step="0.05"
-                value={zoom}
-                onChange={(e) => setZoom(parseFloat(e.target.value))}
-                className="w-full accent-indigo-600 cursor-pointer"
-              />
-              <button
-                onClick={() => setZoom((z) => Math.min(1.8, z + 0.1))}
-                className="p-1.5 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-100 text-gray-600 dark:text-gray-300"
+                山田 太郎
+              </p>
+              <p className="mt-0.5 text-[11px] text-white/70">
+                taro.yamada@university.ac.jp
+              </p>
+              <span
+                className="mt-1.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                style={{
+                  background: "rgba(255,255,255,0.2)",
+                  color: "white",
+                  fontFamily: "var(--font-mono)",
+                }}
               >
-                <IC.Plus />
-              </button>
+                Proプラン
+              </span>
             </div>
           </div>
         </div>
 
-        {/* テーマ切り替え */}
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase font-mono mb-2.5 tracking-wider">
-            Appearance
-          </p>
-          <button
-            onClick={() => setDark(!dark)}
-            className="flex items-center justify-between w-full p-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-black/5 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+        <div
+          className="border-b px-5 py-4"
+          style={{
+            borderColor: "var(--border)",
+            background: "var(--muted)",
+          }}
+        >
+          <p
+            className="mb-3 text-[10px] font-semibold uppercase tracking-widest"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: "var(--muted-foreground)",
+            }}
           >
-            <div className="flex items-center gap-2.5 text-[12px] font-semibold">
-              <span className="p-1.5 rounded-lg bg-amber-100 dark:bg-indigo-900/50 text-amber-600 dark:text-indigo-300">
-                {dark ? <IC.Moon /> : <IC.Sun />}
-              </span>
-              <span>{dark ? "ダークモード" : "ライトモード"}</span>
-            </div>
-            <div
-              className={`w-8 h-4 rounded-full transition-colors relative ${dark ? "bg-indigo-600" : "bg-gray-300"}`}
-            >
+            アカウント情報
+          </p>
+
+          <div className="space-y-2">
+            {ACCOUNT_INFO.map(({ label, value }) => (
               <div
-                className={`w-3 h-3 rounded-full bg-white absolute top-0.5 transition-transform ${dark ? "left-4.5" : "left-0.5"}`}
-              />
-            </div>
-          </button>
+                key={label}
+                className="flex items-center justify-between gap-3"
+              >
+                <span
+                  className="text-[11px]"
+                  style={{ color: "var(--muted-foreground)" }}
+                >
+                  {label}
+                </span>
+                <span
+                  className="text-right text-[11px] font-medium"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--foreground)",
+                  }}
+                >
+                  {value}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div
+            className="mt-3 h-1.5 overflow-hidden rounded-full"
+            style={{ background: "var(--border)" }}
+          >
+            <div
+              className="h-full rounded-full"
+              style={{ width: "24%", background: "#16a34a" }}
+            />
+          </div>
         </div>
 
-        {/* ナビゲーション */}
-        <div className="space-y-1 pt-1">
-          <p className="text-[10px] font-bold text-gray-400 uppercase font-mono mb-2 tracking-wider">
-            Menu
-          </p>
-          <button className="flex items-center gap-3 w-full p-2.5 rounded-xl text-[12px] font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-gray-700 dark:text-gray-200 transition-colors group">
-            <span className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
-              <IC.Grid />
-            </span>
-            ダッシュボード
-          </button>
-          <button className="flex items-center gap-3 w-full p-2.5 rounded-xl text-[12px] font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-gray-700 dark:text-gray-200 transition-colors group">
-            <span className="p-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+        <nav className="flex-1 space-y-0.5 px-3 py-3">
+          <button
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--muted)]"
+            style={{
+              fontFamily: "var(--font-display)",
+              color: "var(--foreground)",
+            }}
+          >
+            <span style={{ color: "var(--muted-foreground)" }}>
               <IC.Bell />
             </span>
-            更新通知
+            <span className="flex-1 text-left">通知</span>
+            <span
+              className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white"
+              style={{
+                background: "#dc2626",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              3
+            </span>
           </button>
-          <button className="flex items-center gap-3 w-full p-2.5 rounded-xl text-[12px] font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-gray-700 dark:text-gray-200 transition-colors group">
-            <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+
+          <button
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-colors hover:bg-[var(--muted)]"
+            style={{
+              fontFamily: "var(--font-display)",
+              color: "var(--foreground)",
+            }}
+          >
+            <span style={{ color: "var(--muted-foreground)" }}>
               <IC.Settings />
             </span>
-            設定
+            <span className="flex-1 text-left">設定</span>
+          </button>
+        </nav>
+
+        <div
+          className="border-t px-3 pb-5 pt-3"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <button
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            <IC.LogOut />
+            ログアウト
           </button>
         </div>
-      </div>
-
-      {/* フッター */}
-      <div className="p-4 border-t border-black/5 dark:border-white/5">
-        <button className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-[12px] font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
-          <IC.LogOut /> ログアウト
-        </button>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 }

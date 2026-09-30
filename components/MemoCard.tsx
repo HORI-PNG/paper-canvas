@@ -1,45 +1,57 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Memo, MemoColor } from "@/types/paper";
 import { IC } from "./Icons";
 
-// 付箋メモのカラー定義
-export const MEMO_COLORS: Record<
+const MEMO_COLORS: Record<
   MemoColor,
-  { bg: string; border: string; text: string; header: string }
+  {
+    bg: string;
+    border: string;
+    text: string;
+    placeholder: string;
+  }
 > = {
   yellow: {
-    bg: "#fef9c3",
-    border: "#fef08a",
+    bg: "#fefce8",
+    border: "#fde047",
     text: "#713f12",
-    header: "#fde047",
+    placeholder: "#a16207",
   },
   pink: {
-    bg: "#fce7f3",
-    border: "#fbcfe8",
+    bg: "#fdf2f8",
+    border: "#f9a8d4",
     text: "#831843",
-    header: "#f472b6",
+    placeholder: "#be185d",
   },
   blue: {
-    bg: "#e0f2fe",
-    border: "#bae6fd",
-    text: "#075985",
-    header: "#38bdf8",
+    bg: "#eff6ff",
+    border: "#93c5fd",
+    text: "#1e3a5f",
+    placeholder: "#3b82f6",
   },
   green: {
-    bg: "#dcfce7",
-    border: "#bbf7d0",
+    bg: "#f0fdf4",
+    border: "#86efac",
     text: "#14532d",
-    header: "#4ade80",
+    placeholder: "#16a34a",
   },
   purple: {
-    bg: "#f3e8ff",
-    border: "#e9d5ff",
+    bg: "#faf5ff",
+    border: "#d8b4fe",
     text: "#581c87",
-    header: "#c084fc",
+    placeholder: "#9333ea",
   },
 };
+
+const MEMO_COLOR_LIST: MemoColor[] = [
+  "yellow",
+  "pink",
+  "blue",
+  "green",
+  "purple",
+];
 
 interface MemoCardProps {
   memo: Memo;
@@ -52,78 +64,124 @@ interface MemoCardProps {
 
 export function MemoCard({
   memo,
-  dark,
   onMouseDown,
   onUpdateText,
   onDeleteMemo,
   onChangeColor,
 }: MemoCardProps) {
-  const mc = MEMO_COLORS[memo.color] || MEMO_COLORS.yellow;
+  const [showPicker, setShowPicker] = useState(false);
+  const color = MEMO_COLORS[memo.color];
 
   return (
     <div
-      className="absolute rounded-xl shadow-md cursor-grab active:cursor-grabbing flex flex-col overflow-hidden transition-shadow hover:shadow-lg"
+      className="paper-card w-52 overflow-visible rounded-2xl shadow-md"
       style={{
         left: memo.x,
         top: memo.y,
-        width: 220,
-        minHeight: 160,
-        backgroundColor: dark ? "#1e2028" : mc.bg,
-        border: `1.5px solid ${dark ? "#2a2d38" : mc.border}`,
+        background: color.bg,
+        border: `1.5px solid ${color.border}`,
+        boxShadow:
+          "0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
+        borderRadius: 16,
       }}
-      onMouseDown={(e) => onMouseDown(e, memo.id)}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        onMouseDown(e, memo.id);
+      }}
     >
-      {/* メモヘッダー（カラー変更パレット＆削除ボタン） */}
       <div
-        className="flex items-center justify-between px-3 py-1.5 cursor-grab"
+        className="flex items-center justify-between rounded-t-2xl px-3 py-2"
         style={{
-          backgroundColor: dark ? "#191b22" : mc.header,
-          opacity: dark ? 1 : 0.6,
+          background: `${color.border}55`,
+          borderBottom: `1px solid ${color.border}`,
         }}
       >
-        <div className="flex items-center gap-1">
-          {(["yellow", "pink", "blue", "green", "purple"] as MemoColor[]).map(
-            (c) => (
-              <button
-                key={c}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onChangeColor(memo.id, c);
-                }}
-                className="w-3 h-3 rounded-full transition-transform hover:scale-125"
-                style={{
-                  backgroundColor: MEMO_COLORS[c].header,
-                  border: memo.color === c ? "1.5px solid #000" : "none",
-                }}
-              />
-            ),
-          )}
+        <div className="flex items-center gap-1.5">
+          <span style={{ color: color.placeholder }}>
+            <IC.Pencil />
+          </span>
+          <span
+            className="text-[10px] font-semibold"
+            style={{
+              fontFamily: "var(--font-mono)",
+              color: color.placeholder,
+            }}
+          >
+            {memo.createdDate}
+          </span>
         </div>
-        <button
-          onClick={(e) => onDeleteMemo(memo.id, e)}
-          className="text-gray-500 hover:text-red-500 p-0.5 rounded transition-colors"
-        >
-          <IC.X />
-        </button>
+
+        <div className="flex items-center gap-1">
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPicker((visible) => !visible);
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="h-5 w-5 rounded-full border-2 border-white/60 shadow-sm transition-transform hover:scale-110"
+              style={{ background: color.border }}
+              title="色を変更"
+              aria-label="メモの色を変更"
+            />
+
+            {showPicker && (
+              <div
+                className="absolute top-7 right-0 z-50 flex gap-1.5 rounded-xl border p-2 shadow-xl"
+                style={{ background: "white", borderColor: "#e5e7eb" }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                {MEMO_COLOR_LIST.map((memoColor) => (
+                  <button
+                    key={memoColor}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChangeColor(memo.id, memoColor);
+                      setShowPicker(false);
+                    }}
+                    className="h-5 w-5 rounded-full border-2 shadow-sm transition-transform hover:scale-125"
+                    style={{
+                      background: MEMO_COLORS[memoColor].border,
+                      borderColor:
+                        memo.color === memoColor
+                          ? "#374151"
+                          : "rgba(255,255,255,0.6)",
+                    }}
+                    aria-label={`${memoColor}に変更`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteMemo(memo.id, e);
+              setShowPicker(false);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="flex h-5 w-5 items-center justify-center rounded-full transition-opacity hover:opacity-70"
+            style={{ color: color.placeholder }}
+            aria-label="メモを削除"
+          >
+            <IC.X />
+          </button>
+        </div>
       </div>
 
-      {/* メモ本文入力エリア */}
       <textarea
         value={memo.text}
         onChange={(e) => onUpdateText(memo.id, e.target.value)}
-        onMouseDown={(e) => e.stopPropagation()} // ドラッグイベントと干渉しないよう伝播を停止
+        onMouseDown={(e) => e.stopPropagation()}
         placeholder="メモを入力..."
-        className="w-full flex-1 p-3 bg-transparent resize-none outline-none text-[12px] leading-relaxed"
+        className="w-full resize-none rounded-b-2xl bg-transparent px-3 py-2.5 text-[12px] leading-relaxed outline-none"
         style={{
-          color: dark ? "#eceef2" : mc.text,
+          color: color.text,
           fontFamily: "var(--font-body)",
+          height: 120,
         }}
       />
-
-      {/* 作成日時 */}
-      <div className="px-3 pb-2 text-[9px] text-gray-400 font-mono text-right select-none">
-        {memo.createdDate}
-      </div>
     </div>
   );
 }
