@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useEffect, useId, useState } from "react";
+import React, { useId, useState } from "react";
 import { IC } from "./Icons";
 
 interface GroupCreatorProps {
-  show: boolean;
-  dark: boolean;
   onClose: () => void;
   onCreateGroup: (label: string, bgColor: string, borderColor: string) => void;
 }
@@ -30,8 +28,8 @@ const BORDER_PRESETS = [
   "#6B7280",
 ];
 
+// 親が表示するときだけマウントするので、開くたびに state は初期値から始まる
 export function GroupCreator({
-  show,
   onClose,
   onCreateGroup,
 }: GroupCreatorProps) {
@@ -39,16 +37,6 @@ export function GroupCreator({
   const [bgColor, setBgColor] = useState(BG_PRESETS[0]);
   const [borderColor, setBorderColor] = useState(BORDER_PRESETS[0]);
   const inputId = useId();
-
-  useEffect(() => {
-    if (show) {
-      setLabel("新しいグループ");
-      setBgColor(BG_PRESETS[0]);
-      setBorderColor(BORDER_PRESETS[0]);
-    }
-  }, [show]);
-
-  if (!show) return null;
 
   const handleCreate = () => {
     onCreateGroup(label.trim() || "新しいグループ", bgColor, borderColor);
@@ -98,6 +86,12 @@ export function GroupCreator({
               id={inputId}
               value={label}
               onChange={(e) => setLabel(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreate();
+                if (e.key === "Escape") onClose();
+              }}
+              autoFocus
+              maxLength={100}
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--muted)] px-3 py-2.5 text-[13px] text-[var(--foreground)] outline-none transition-shadow focus:ring-2 focus:ring-[var(--ring)]"
               placeholder="例：言語モデル、画像認識…"
             />

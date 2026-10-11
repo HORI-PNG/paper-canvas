@@ -1,11 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
 @theme inline {
-  --font-display: "DM Sans", sans-serif;
-  --font-body: "Inter", "Hiragino Kaku Gothic ProN", "Hiragino Sans",
-    "Noto Sans JP", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-display: var(--font-dm-sans), "Hiragino Sans", "Noto Sans JP",
+    sans-serif;
+  --font-body: var(--font-inter), "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+    "Noto Sans JP", "Yu Gothic", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -75,7 +75,6 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   margin: 0;
-  overflow: hidden;
 }
 
 /* ドットグリッドのキャンバス */
@@ -90,6 +89,7 @@ body {
 /* ドラッグ可能なカード */
 .paper-card {
   position: absolute;
+  touch-action: none;
   cursor: grab;
   user-select: none;
   transition: box-shadow 0.15s ease;
@@ -192,4 +192,58 @@ body {
 ::-webkit-scrollbar {
   width: 0;
   height: 0;
+}
+/* Tailwind の dark: バリアントを、OS 設定ではなく <html class="dark"> で切り替える */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ログイン画面の背景 */
+.auth-bg {
+  background-color: var(--canvas-bg);
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(152, 251, 152, 0.35), transparent 45%),
+    radial-gradient(circle at 85% 90%, rgba(22, 101, 52, 0.18), transparent 50%),
+    radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px);
+  background-size: auto, auto, 28px 28px;
+}
+
+/* トースト通知 */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-in {
+  animation: toastIn 0.2s ease-out both;
+}
+
+/* 解析中のカードのプレースホルダ */
+@keyframes pulseSoft {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.pulse-soft {
+  animation: pulseSoft 1.4s ease-in-out infinite;
+}
+
+/* グループ枠の背景。ダークモードでは淡い色が浮かないよう、透明度を上げる */
+.group-frame {
+  background-color: color-mix(in srgb, var(--group-bg) 73%, transparent);
+}
+
+.dark .group-frame {
+  background-color: color-mix(in srgb, var(--group-bg) 14%, transparent);
+}
+
+/* ダークモードではタグの文字色を明るい色に切り替える（暗い背景で読めるように） */
+.dark .paper-tag {
+  color: var(--tag-dark) !important;
 }

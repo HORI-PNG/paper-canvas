@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { IC } from "./Icons";
 import { Group, ResizeHandle } from "@/types/paper";
 
 const HANDLES: {
@@ -36,49 +37,93 @@ const HANDLES: {
 
 interface GroupFrameProps {
   group: Group;
-  dark: boolean;
-  zoom: number;
-  onMouseDown: (e: React.MouseEvent, id: string) => void;
+  onPointerDown: (e: React.PointerEvent, id: string) => void;
   onResizeStart: (
-    e: React.MouseEvent,
+    e: React.PointerEvent,
     id: string,
     handle: ResizeHandle,
   ) => void;
-  onDeleteGroup: (id: string, e: React.MouseEvent) => void;
+  onRename: (id: string, label: string) => void;
+  onDelete: (id: string) => void;
 }
 
 export function GroupFrame({
   group,
-  onMouseDown,
+  onPointerDown,
   onResizeStart,
+  onRename,
+  onDelete,
 }: GroupFrameProps) {
+  const [editing, setEditing] = useState(false);
+
+  const finishEditing = (value: string) => {
+    setEditing(false);
+    const label = value.trim().slice(0, 100);
+    if (label && label !== group.label) onRename(group.id, label);
+  };
+
   return (
     <div
-      className="absolute rounded-[14px] border-2 border-dashed"
+      className="group-frame group/frame absolute touch-none rounded-[14px] border-2 border-dashed"
       style={{
         left: group.x,
         top: group.y,
         width: group.width,
         height: group.height,
-        background: `${group.bgColor}BB`,
+        // zIndex: 0 で独立した重なり順を作り、リサイズハンドルが論文カードより上に出ないようにする
+        zIndex: 0,
+        ["--group-bg" as string]: group.bgColor,
         borderColor: group.borderColor,
         cursor: "move",
       }}
-      onMouseDown={(e) => {
+      onPointerDown={(e) => {
         e.stopPropagation();
-        onMouseDown(e, group.id);
+        onPointerDown(e, group.id);
       }}
     >
       <div
-        className="absolute -top-7 left-4 select-none rounded-md px-2.5 py-1 text-[11px] font-semibold"
+        className="absolute -top-7 left-4 flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-semibold select-none"
         style={{
           fontFamily: "var(--font-display)",
           color: group.borderColor,
           background: group.bgColor,
           border: `1px solid ${group.borderColor}55`,
         }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          setEditing(true);
+        }}
+        title="ダブルクリックで名前を変更"
       >
-        {group.label}
+        {editing ? (
+          <input
+            autoFocus
+            defaultValue={group.label}
+            maxLength={100}
+            onPointerDown={(e) => e.stopPropagation()}
+            onBlur={(e) => finishEditing(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+              if (e.key === "Escape") setEditing(false);
+            }}
+            className="w-40 bg-transparent outline-none"
+            aria-label="グループ名"
+          />
+        ) : (
+          group.label
+        )}
+        <button
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(group.id);
+          }}
+          className="ml-1 opacity-0 transition-opacity group-hover/frame:opacity-70 hover:!opacity-100 focus:opacity-100"
+          aria-label={`グループ「${group.label}」を削除`}
+          title="グループを削除"
+        >
+          <IC.X />
+        </button>
       </div>
 
       {HANDLES.map((handle) => (
@@ -91,7 +136,7 @@ export function GroupFrame({
             borderColor: group.borderColor,
             boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
           }}
-          onMouseDown={(e) => {
+          onPointerDown={(e) => {
             e.stopPropagation();
             onResizeStart(e, group.id, handle.id);
           }}

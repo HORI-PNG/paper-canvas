@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Memo, MemoColor } from "@/types/paper";
+import { MEMO_COLORS as MEMO_COLOR_LIST, Memo, MemoColor } from "@/types/paper";
 import { IC } from "./Icons";
 
 const MEMO_COLORS: Record<
@@ -45,26 +45,17 @@ const MEMO_COLORS: Record<
   },
 };
 
-const MEMO_COLOR_LIST: MemoColor[] = [
-  "yellow",
-  "pink",
-  "blue",
-  "green",
-  "purple",
-];
-
 interface MemoCardProps {
   memo: Memo;
-  dark: boolean;
-  onMouseDown: (e: React.MouseEvent, id: string) => void;
+  onPointerDown: (e: React.PointerEvent, id: string) => void;
   onUpdateText: (id: string, text: string) => void;
-  onDeleteMemo: (id: string, e: React.MouseEvent) => void;
+  onDeleteMemo: (id: string) => void;
   onChangeColor: (id: string, color: MemoColor) => void;
 }
 
 export function MemoCard({
   memo,
-  onMouseDown,
+  onPointerDown,
   onUpdateText,
   onDeleteMemo,
   onChangeColor,
@@ -84,9 +75,9 @@ export function MemoCard({
           "0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
         borderRadius: 16,
       }}
-      onMouseDown={(e) => {
+      onPointerDown={(e) => {
         e.stopPropagation();
-        onMouseDown(e, memo.id);
+        onPointerDown(e, memo.id);
       }}
     >
       <div
@@ -118,7 +109,7 @@ export function MemoCard({
                 e.stopPropagation();
                 setShowPicker((visible) => !visible);
               }}
-              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
               className="h-5 w-5 rounded-full border-2 border-white/60 shadow-sm transition-transform hover:scale-110"
               style={{ background: color.border }}
               title="色を変更"
@@ -129,7 +120,7 @@ export function MemoCard({
               <div
                 className="absolute top-7 right-0 z-50 flex gap-1.5 rounded-xl border p-2 shadow-xl"
                 style={{ background: "white", borderColor: "#e5e7eb" }}
-                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
               >
                 {MEMO_COLOR_LIST.map((memoColor) => (
                   <button
@@ -157,10 +148,10 @@ export function MemoCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onDeleteMemo(memo.id, e);
+              onDeleteMemo(memo.id);
               setShowPicker(false);
             }}
-            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             className="flex h-5 w-5 items-center justify-center rounded-full transition-opacity hover:opacity-70"
             style={{ color: color.placeholder }}
             aria-label="メモを削除"
@@ -173,13 +164,16 @@ export function MemoCard({
       <textarea
         value={memo.text}
         onChange={(e) => onUpdateText(memo.id, e.target.value)}
-        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
         placeholder="メモを入力..."
-        className="w-full resize-none rounded-b-2xl bg-transparent px-3 py-2.5 text-[12px] leading-relaxed outline-none"
+        maxLength={5000}
+        aria-label="メモの内容"
+        className="w-full select-text resize-none rounded-b-2xl bg-transparent px-3 py-2.5 text-[12px] leading-relaxed outline-none"
         style={{
           color: color.text,
           fontFamily: "var(--font-body)",
           height: 120,
+          touchAction: "auto",
         }}
       />
     </div>

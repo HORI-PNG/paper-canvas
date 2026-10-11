@@ -68,18 +68,17 @@ const GLASS: Record<
 interface PaperCardProps {
   paper: Paper;
   selected: boolean;
-  dark: boolean;
-  zoom: number;
-  onMouseDown: (e: React.MouseEvent, id: string) => void;
+  onPointerDown: (e: React.PointerEvent, id: string) => void;
   onSelectPaper: (paper: Paper) => void;
-  onDeletePaper: (id: string, e: React.MouseEvent) => void;
+  onDeletePaper: (paper: Paper) => void;
 }
 
 export function PaperCard({
   paper,
   selected,
-  onMouseDown,
+  onPointerDown,
   onSelectPaper,
+  onDeletePaper,
 }: PaperCardProps) {
   const color = GLASS[paper.color];
 
@@ -101,19 +100,16 @@ export function PaperCard({
 
   return (
     <div
-      className="paper-card w-[268px] overflow-hidden"
-      style={{ left: paper.x, top: paper.y, ...cardStyle }}
-      onMouseDown={(e) => {
-        e.stopPropagation();
-        onMouseDown(e, paper.id);
+      className="paper-card group/card w-[268px] overflow-hidden"
+      style={{
+        left: paper.x,
+        top: paper.y,
+        zIndex: selected ? 2 : 1,
+        ...cardStyle,
       }}
-      onClick={(e) => {
+      onPointerDown={(e) => {
         e.stopPropagation();
-        onSelectPaper(paper);
-      }}
-      onDoubleClick={(e) => {
-        e.stopPropagation();
-        onSelectPaper(paper);
+        onPointerDown(e, paper.id);
       }}
     >
       <div className="px-4 pt-3.5 pb-3" style={headerStyle}>
@@ -127,13 +123,27 @@ export function PaperCard({
           >
             {paper.year}
           </span>
-          <div
-            className="w-2 h-2 rounded-full shadow-sm"
-            style={{
-              background: color.dot,
-              boxShadow: `0 0 6px ${color.dot}`,
-            }}
-          />
+          <div className="flex items-center gap-1.5">
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeletePaper(paper);
+              }}
+              className="flex h-5 w-5 items-center justify-center rounded-md text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover/card:opacity-100 hover:text-red-500 focus:opacity-100"
+              aria-label={`「${paper.title}」を削除`}
+              title="削除"
+            >
+              <IC.Trash />
+            </button>
+            <div
+              className="w-2 h-2 rounded-full shadow-sm"
+              style={{
+                background: color.dot,
+                boxShadow: `0 0 6px ${color.dot}`,
+              }}
+            />
+          </div>
         </div>
 
         <h3
@@ -195,11 +205,12 @@ export function PaperCard({
           {paper.tags.map((tag) => (
             <span
               key={tag}
-              className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+              className="paper-tag text-[10px] px-2 py-0.5 rounded-full font-semibold"
               style={{
                 fontFamily: "var(--font-mono)",
                 background: `rgba(${color.rgb},0.18)`,
                 color: color.tagText,
+                  ["--tag-dark" as string]: color.dot,
               }}
             >
               #{tag}
@@ -218,7 +229,25 @@ export function PaperCard({
             {paper.createdDate}
           </span>
 
+          <div className="flex items-center gap-2">
+            {paper.note.trim() && (
+              <span
+                className="text-[var(--muted-foreground)]"
+                title="個人メモあり"
+              >
+                <IC.Pencil />
+              </span>
+            )}
+            {paper.pdfPath && (
+              <span
+                className="text-[var(--muted-foreground)]"
+                title="PDF添付あり"
+              >
+                <IC.File />
+              </span>
+            )}
           <button
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
               onSelectPaper(paper);
@@ -229,8 +258,35 @@ export function PaperCard({
             <IC.Expand />
             詳細
           </button>
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** AI 解析中に表示する仮のカード */
+export function PendingPaperCard({ x, y }: { x: number; y: number }) {
+  return (
+    <div
+      className="paper-card pulse-soft w-[268px] rounded-2xl border-[1.5px] border-dashed border-[#16a34a]/50 bg-[var(--card)]/80 p-4"
+      style={{ left: x, top: y, cursor: "default" }}
+      aria-busy="true"
+    >
+      <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold text-[#16a34a]">
+        <IC.Loader />
+        AI が論文を解析中…
+      </div>
+      <div className="space-y-2">
+        <div className="h-3 w-4/5 rounded bg-[var(--muted)]" />
+        <div className="h-3 w-3/5 rounded bg-[var(--muted)]" />
+        <div className="mt-4 h-2.5 w-full rounded bg-[var(--muted)]" />
+        <div className="h-2.5 w-11/12 rounded bg-[var(--muted)]" />
+        <div className="h-2.5 w-4/5 rounded bg-[var(--muted)]" />
+      </div>
+      <p className="mt-4 text-[10px] text-[var(--muted-foreground)]">
+        初めて追加される論文は10〜30秒ほどかかります
+      </p>
     </div>
   );
 }
