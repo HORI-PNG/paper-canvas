@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as api from "@/lib/canvas-api";
+import { collectTags, matchMemo, matchPaper, normalize, parseQuery } from "@/lib/search";
 import { createClient } from "@/lib/supabase/client";
 import type {
   CardColor,
@@ -22,6 +23,7 @@ import { MemoCard } from "./MemoCard";
 import { useNotifications } from "./Notifications";
 import { PaperCard, PendingPaperCard } from "./PaperCard";
 import { RightDrawer } from "./RightDrawer";
+import { SearchPanel } from "./SearchPanel";
 import { SettingsModal } from "./SettingsModal";
 
 export interface CurrentUser {
@@ -126,6 +128,42 @@ export function CanvasApp({
   const selectedPaper = papers.find((paper) => paper.id === selectedId) ?? null;
 
   const interaction = useRef<Interaction | null>(null);
+
+  // ---- 検索・タグ絞り込み -------------------------------------------------
+  const searchRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // useMemo: papers が変わったときだけ集計し直す（ドラッグ中の再描画で毎回数え直さない）
+  const tagCounts = useMemo(() => collectTags(papers), [papers]);
+  // 論文を削除してタグが無くなった場合に備えて、存在するタグだけを有効にする
+  const activeTags = selectedTags.filter((key) =>
+    tagCounts.some((tag) => tag.key === key),
+  );
+  const terms = parseQuery(query);
+  const filtering = terms.length > 0 || activeTags.length > 0;
+  const matchedPapers = filtering
+    ? papers.filter((paper) => matchPaper(paper, terms, activeTags))
+    : null;
+  const matchedPaperIds = new Set(matchedPapers?.map((paper) => paper.id));
+
+  const toggleTag = (key: string) =>
+    setSelectedTags((current) =>
+      current.includes(key)
+        ? current.filter((value) => value !== key)
+        : [...current, key],
+    );
+  /** カードや詳細パネルのタグをクリックしたら、そのタグで絞り込む */
+  const addTagFilter = (label: string) => {
+    const key = normalize(label);
+    setSelectedTags((current) =>
+      current.includes(key) ? current : [...current, key],
+    );
+  };
+  const clearSearch = () => {
+    setQuery("");
+    setSelectedTags([]);
+  };
 
   // ---- 保存処理 ----------------------------------------------------------
   // 保存中の件数を数えて、ヘッダーに「保存中… / 保存済み」を表示する。
@@ -468,9 +506,23 @@ export function CanvasApp({
     return () => canvas.removeEventListener("wheel", handleWheel);
   }, [zoomAt]);
 
-  // Esc でパネル類を閉じる
+  // ショートカット: "/" または Ctrl(⌘)+K で検索欄へ、Esc でパネル類を閉じる
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const typing =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+      if (
+        (e.key === "/" && !typing) ||
+        (e.key.toLowerCase() === "k" && (e.ctrlKey || e.metaKey))
+      ) {
+        e.preventDefault();
+        searchRef.current?.focus();
+        searchRef.current?.select();
+        return;
+      }
       if (e.key !== "Escape") return;
       setShowMenu(false);
       setSelectedId(null);
@@ -485,10 +537,23 @@ export function CanvasApp({
     if (!url || pending) return;
 
     const center = canvasCenter();
-    const position = {
+    let position = {
       x: Math.round(center.x - PAPER_W / 2),
       y: Math.round(center.y - PAPER_H / 2),
     };
+    // 既存のカードとほぼ同じ位置なら、右下に少しずつずらして重なりを避ける
+    for (
+      let i = 0;
+      i < 20 &&
+      papers.some(
+        (paper) =>
+          Math.abs(paper.x - position.x) < 40 &&
+          Math.abs(paper.y - position.y) < 40,
+      );
+      i++
+    ) {
+      position = { x: position.x + 36, y: position.y + 36 };
+    }
     setPending(position);
 
     try {
@@ -717,6 +782,7 @@ export function CanvasApp({
               <MemoCard
                 key={memo.id}
                 memo={memo}
+                dimmed={filtering && !matchMemo(memo, terms, activeTags)}
                 onPointerDown={(e, id) => handleItemPointerDown(e, id, "memo")}
                 onUpdateText={handleMemoText}
                 onDeleteMemo={handleDeleteMemo}
@@ -729,6 +795,8 @@ export function CanvasApp({
                 key={paper.id}
                 paper={paper}
                 selected={selectedId === paper.id}
+                dimmed={filtering && !matchedPaperIds.has(paper.id)}
+                onTagClick={addTagFilter}
                 onPointerDown={(e, id) => handleItemPointerDown(e, id, "paper")}
                 onSelectPaper={(p) => setSelectedId(p.id)}
                 onDeletePaper={handleDeletePaper}
@@ -737,6 +805,24 @@ export function CanvasApp({
 
             {pending && <PendingPaperCard x={pending.x} y={pending.y} />}
           </div>
+
+          {!isEmpty && (
+            <SearchPanel
+              ref={searchRef}
+              query={query}
+              onQueryChange={setQuery}
+              tags={tagCounts}
+              selectedTags={activeTags}
+              onToggleTag={toggleTag}
+              onClear={clearSearch}
+              results={matchedPapers}
+              totalPapers={papers.length}
+              onJump={(paper) => {
+                setSelectedId(paper.id);
+                centerOn(paper.x + PAPER_W / 2, paper.y + PAPER_H / 2);
+              }}
+            />
+          )}
 
           {isEmpty && (
             <EmptyState
@@ -805,6 +891,7 @@ export function CanvasApp({
             onUpdate={handleUpdatePaper}
             onNoteChange={handleNoteChange}
             onDelete={handleDeletePaper}
+            onTagClick={addTagFilter}
           />
         )}
       </main>

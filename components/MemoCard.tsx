@@ -47,6 +47,7 @@ const MEMO_COLORS: Record<
 
 interface MemoCardProps {
   memo: Memo;
+  dimmed: boolean;
   onPointerDown: (e: React.PointerEvent, id: string) => void;
   onUpdateText: (id: string, text: string) => void;
   onDeleteMemo: (id: string) => void;
@@ -55,6 +56,7 @@ interface MemoCardProps {
 
 export function MemoCard({
   memo,
+  dimmed,
   onPointerDown,
   onUpdateText,
   onDeleteMemo,
@@ -74,6 +76,8 @@ export function MemoCard({
         boxShadow:
           "0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
         borderRadius: 16,
+        opacity: dimmed ? 0.18 : 1,
+        transition: "opacity 0.2s ease",
       }}
       onPointerDown={(e) => {
         e.stopPropagation();

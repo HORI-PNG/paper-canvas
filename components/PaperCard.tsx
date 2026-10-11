@@ -68,6 +68,9 @@ const GLASS: Record<
 interface PaperCardProps {
   paper: Paper;
   selected: boolean;
+  /** 検索・絞り込みの条件に合わないとき true（薄く表示する） */
+  dimmed: boolean;
+  onTagClick: (tag: string) => void;
   onPointerDown: (e: React.PointerEvent, id: string) => void;
   onSelectPaper: (paper: Paper) => void;
   onDeletePaper: (paper: Paper) => void;
@@ -76,6 +79,8 @@ interface PaperCardProps {
 export function PaperCard({
   paper,
   selected,
+  dimmed,
+  onTagClick,
   onPointerDown,
   onSelectPaper,
   onDeletePaper,
@@ -104,8 +109,11 @@ export function PaperCard({
       style={{
         left: paper.x,
         top: paper.y,
-        zIndex: selected ? 2 : 1,
+        // 選択中 > 検索でヒット > 薄く表示、の順に手前に出す
+        zIndex: selected ? 3 : dimmed ? 1 : 2,
         ...cardStyle,
+        opacity: dimmed ? 0.18 : 1,
+        transition: "opacity 0.2s ease, box-shadow 0.15s ease",
       }}
       onPointerDown={(e) => {
         e.stopPropagation();
@@ -203,18 +211,24 @@ export function PaperCard({
       >
         <div className="flex flex-wrap gap-1 mb-2.5">
           {paper.tags.map((tag) => (
-            <span
+            <button
               key={tag}
-              className="paper-tag text-[10px] px-2 py-0.5 rounded-full font-semibold"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onTagClick(tag);
+              }}
+              title={`#${tag} で絞り込む`}
+              className="paper-tag text-[10px] px-2 py-0.5 rounded-full font-semibold transition-opacity hover:opacity-70"
               style={{
                 fontFamily: "var(--font-mono)",
                 background: `rgba(${color.rgb},0.18)`,
                 color: color.tagText,
-                  ["--tag-dark" as string]: color.dot,
+                ["--tag-dark" as string]: color.dot,
               }}
             >
               #{tag}
-            </span>
+            </button>
           ))}
         </div>
 

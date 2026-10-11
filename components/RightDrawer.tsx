@@ -14,6 +14,7 @@ interface RightDrawerProps {
   onUpdate: (id: string, patch: Partial<Pick<Paper, "color" | "pdfPath">>) => void;
   onNoteChange: (id: string, note: string) => void;
   onDelete: (paper: Paper) => void;
+  onTagClick: (tag: string) => void;
 }
 
 const COLOR_STYLES: Record<
@@ -35,6 +36,7 @@ export function RightDrawer({
   onUpdate,
   onNoteChange,
   onDelete,
+  onTagClick,
 }: RightDrawerProps) {
   const { notify } = useNotifications();
   const color = COLOR_STYLES[paper.color];
@@ -160,9 +162,11 @@ export function RightDrawer({
               {paper.year}
             </span>
             {paper.tags.map((tag) => (
-              <span
+              <button
                 key={tag}
-                className="paper-tag rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                onClick={() => onTagClick(tag)}
+                title={`#${tag} で絞り込む`}
+                className="paper-tag rounded-full px-2 py-0.5 text-[10px] font-semibold transition-opacity hover:opacity-70"
                 style={{
                   fontFamily: "var(--font-mono)",
                   background: color.tagBg,
@@ -171,7 +175,7 @@ export function RightDrawer({
                 }}
               >
                 #{tag}
-              </span>
+              </button>
             ))}
           </div>
 
